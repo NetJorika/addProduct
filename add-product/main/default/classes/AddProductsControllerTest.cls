@@ -107,7 +107,6 @@ public class AddProductsControllerTest {
         System.assertEquals(false, res);
         System.assertEquals(0, oppRes.size());
     }
-
     
     @isTest
     static void testAddProductsWithoutFilter() {
