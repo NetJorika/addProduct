@@ -1,0 +1,15 @@
+{
+  "packageDirectories": [
+    {
+		"path": "add-product",
+		"default": true,
+		"package": "AddProduct",
+		"versionName": "ver 1.0",
+		"versionNumber": "1.0.0.NEXT"
+    }
+  ],
+  "name": "abctech123-dev-ed",
+  "namespace": "GeorgAddProduct",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "52.0"
+}

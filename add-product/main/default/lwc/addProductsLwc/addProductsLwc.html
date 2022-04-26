@@ -1,0 +1,208 @@
+<template>
+    <!--Spinner PAGE-->
+    <template if:true={getSpinnerStage}>
+        <div class="slds-is-relative" style="height: 200px;">
+            <lightning-spinner alternative-text="Loading" size="medium" variant="brand"></lightning-spinner>
+        </div>
+    </template>
+
+    <!--ZERO PAGE-->
+    <template if:true={getZeroStage}>
+        <header class="slds-modal__header">
+            <h2 id="modal-heading-00" class="slds-modal__title slds-hyphenate">Choose Price Book</h2>
+        </header>
+        <div class="modal-body scrollable slds-modal__content slds-p-around__medium" id="modal-content-id-0">
+            <div class="slds-p-around--medium">
+                <p>   
+                    Select a Price Book to associate with this opportunity. 
+                    You can add products only from the Price Book you associate with this opportunity. 
+                    Changing the Price Book deletes all products from the opportunity.
+                </p>
+                <div class="combobox" style = {comboboxHeight} >
+                    <lightning-combobox
+                            name="pricebook"
+                            label="Price Book"
+                            value={pricebookId}
+                            options={pricebookList}
+                            placeholder="Select a Price Book"
+                            onchange={handlePricebookChange}
+                            required
+                    ></lightning-combobox>
+                </div>
+            </div>
+        </div>
+        <footer class="slds-modal__footer">
+            <button class="slds-button slds-button_neutral" onclick={closeQuickAction}>Close</button>
+            <button class="slds-button slds-button_brand"
+                    onclick={zeroNextClick}
+                    disabled={isPricebookNotExists}>
+                    Save
+            </button>
+        </footer>
+    </template>
+
+    <!--FIRST PAGE-->
+    <template if:true={getFirstStage}>
+        <header class="slds-modal__header">
+            <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Add products</h2>
+            <div class="slds-modal__content slds-hyphenate">Price Book: {pricebookName}</div>
+        </header>
+        <div class="slds-modal__menu slds-p-around_xxx-small" id="modal-content-id-1">
+            <div class="search-form slds-grid slds-p-bottom_small slds-p-top_xx-small">
+                <div class="search-input">
+                    <lightning-input class="slds-p-left_medium" type="search" title="Search Products"
+                        placeholder="Search Products..." data-element="search-name" value={name} label="search"
+                        variant="label-hidden" onchange={handleKeyChange}>
+                    </lightning-input>
+                </div>
+                <div class="search-button slds-p-left_small">
+                    <button data-id="button-search" class="slds-button slds-button_icon slds-button_icon-border-filled"
+                        type="button" title="Show quick filters" onclick={showHidePanel}>
+                        <svg class="slds-button__icon" aria-hidden="true">
+                            <use xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#filterList"></use>
+                        </svg>
+                        <span class="slds-assistive-text">Show quick filters</span>
+                    </button>
+                </div>
+            </div>
+            <template if:true={products}>
+                <p class="slds-p-left_medium">
+                    <template if:true={isSelectedRowsKeysZero}>
+                        <template if:false={isSelectedShow}>
+                            Show selected (0)
+                        </template>
+                        <template if:true={isSelectedShow}>
+                            <a onclick={hideSelected}>Back to Results</a>
+                        </template>
+                    </template>
+                    <template if:false={isSelectedRowsKeysZero}>
+                        <template if:false={isSelectedShow}>
+                            <a onclick={showSelected}>Show selected ({allSelectedIds.length})</a>
+                        </template>
+                        <template if:true={isSelectedShow}>
+                            <a onclick={hideSelected}>Back to Results</a>
+                        </template>
+                    </template>
+
+                    <template if:true={isFilteredBy}>
+                        &nbsp;•&nbsp;Filtered by&nbsp;
+                        <template if:true={isFilteredByProductCode}>
+                            Product Code
+                        </template>
+                        <template if:true={isFilteredByAll}>
+                            ,&nbsp;
+                        </template>
+                        <template if:true={isFilteredByFamily}>
+                            Product Family
+                        </template>
+                    </template>
+                </p>
+                <div style="height: 300px;">
+                    <div class="slds-grid">
+                        <div class="slds-col slds-no-space" style="height: 300px;">
+                            <lightning-datatable 
+                                data={products} 
+                                key-field="Id" 
+                                columns={columnsFirstPage}
+                                default-sort-direction={defaultSortDirection} 
+                                sorted-direction={sortDirection}
+                                sorted-by={sortedBy} 
+                                onsort={onHandleSort} 
+                                onrowselection={rowSelection}
+                                selected-rows={selectedRowsKeysUpdate}>
+                            </lightning-datatable>
+                        </div>
+                        <div class="slds-col slds-no-flex">
+                            <div data-id="panel"
+                                class="slds-panel slds-size_medium slds-panel_docked slds-panel_docked-right"
+                                aria-hidden="false">
+                                <div class="slds-panel__header">
+                                    <h2 class="slds-panel__header-title slds-text-heading_small slds-truncate"
+                                        title="Set filter">
+                                        Set filter
+                                        <lightning-helptext class="slds-p-around_xx-small"
+                                            content="You can't save quick filters, and they don't affect other users">
+                                        </lightning-helptext>
+                                    </h2>
+                                    <button
+                                        class="slds-button slds-button_icon slds-button_icon-small slds-panel__close"
+                                        title="Close Filters" onclick={showHidePanel}>
+                                        <svg class="slds-button__icon" aria-hidden="true">
+                                            <use xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#close"></use>
+                                        </svg>
+                                        <span class="slds-assistive-text">Close Filters</span>
+                                    </button>
+                                </div>
+                                <div class="slds-panel__body slds-p-top_xx-small slds-p-left_small slds-p-right_small">
+                                    <div class="slds-grid slds-grid_vertical">
+
+                                        <lightning-input type="text" label="Product Code" value={productCode} class="slds-p-bottom_medium" onchange={handleProductCodeChange}></lightning-input>
+                                        
+                                        <label for="groupProducts" class="slds-p-bottom_x-small labelText">
+                                            Product Family
+                                        </label>
+                                        <div class="slds-col slds-grow slds-scrollable_y" style="height: 90px;">
+                                            <template if:true={familiyPicklistValue}>
+                                                <lightning-checkbox-group options={familiyPicklistValue}
+                                                                          value={familiesCheckbox}
+                                                                          onchange={handleFamilyCheckboxChange}
+                                                                          data-id="groupProducts"
+                                                                          variant="label-hidden">
+                                                </lightning-checkbox-group>
+                                            </template>
+                                            <template if:true={familiyErrors}>
+                                                {familiyErrors}
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template if:true={error}>
+                No items to display.
+            </template>
+        </div>
+        <footer class="slds-modal__footer">
+            <button class="slds-button slds-button_neutral" onclick={closeQuickAction}>Close</button>
+            <button class="slds-button slds-button_brand"
+                    onclick={firstNextClick}
+                    disabled={isSecondNextButtonDisabled}>
+                    Next
+            </button>
+        </footer>
+    </template>
+
+<!--SECOND PAGE-->
+    <template if:true={getSecondStage}>
+        <header class="slds-modal__header">
+            <h2 id="modal-heading-02" class="slds-modal__title slds-hyphenate">Edit Selected Products</h2>
+        </header>
+        <div class="slds-modal__menu slds-p-around_xxx-small" id="modal-content-id-2">
+            <div style="height: 200px;">
+                <lightning-datatable 
+                    data={selectedProducts}
+                    columns={columnsSecondPage}
+                    key-field="Id"
+                    hide-checkbox-column
+                    show-row-number-column
+                    suppress-bottom-bar
+                    errors={secontTableErrors}
+                    onrowaction={handleRowAction}>
+                </lightning-datatable>
+                <template if:true={error}>
+                    {error}
+                </template>
+            </div>
+        </div>
+        <footer class="slds-modal__footer">
+            <button class="slds-button slds-button_neutral" onclick={clickBack}>Back</button>
+            <template if:false={isLeadConvert}>
+                <button class="slds-button slds-button_neutral" onclick={closeQuickAction}>Close</button>
+                <button class="slds-button slds-button_brand" onclick={saveOpportunityLineItem}>Save</button>
+            </template>
+        </footer>
+    </template>
+</template>
