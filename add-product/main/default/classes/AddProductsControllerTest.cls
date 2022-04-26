@@ -80,7 +80,6 @@ public class AddProductsControllerTest {
         System.assertEquals(pricebookAll, res.pricebookAll);
     }
 
-
     @isTest 
     static void testUpdateOpportunityPricebook(){
         Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1 ];
