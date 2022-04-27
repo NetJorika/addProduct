@@ -39,3 +39,4 @@ $RECYCLE.BIN/
 # Local environment variables
 .env
 authFile.json
+apexScanResults.sarif
