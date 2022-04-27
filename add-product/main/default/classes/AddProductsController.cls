@@ -30,7 +30,6 @@ public class AddProductsController {
             }
             res.pricebookAll = pricebookAll;
         }
-        
         return res;
     }
 
