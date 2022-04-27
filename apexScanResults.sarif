@@ -1,0 +1,1 @@
+{"version":"2.1.0","$schema":"http://json.schemastore.org/sarif-2.1.0","runs":[{"tool":{"driver":{"name":"pmd","version":"6.43.0","informationUri":"https://pmd.github.io/pmd","rules":[]}},"results":[],"invocations":[{"executionSuccessful":true,"toolExecutionNotifications":[]}]}]}
