@@ -3,6 +3,7 @@ public class AddProductsControllerTest {
 
     @TestSetup
     static void makeData(){
+        
         Account acc = new Account(
             Name = 'test'
         );
@@ -56,9 +57,9 @@ public class AddProductsControllerTest {
         AddProductsController.PricebookResult res = AddProductsController.getPricebookFromOpportunity(opp.Id);
         Test.stopTest();
 
-        System.assertEquals(null, res.pricebookAll);
-        System.assertEquals(pricebook.Id, res.pricebookId);
-        System.assertEquals(pricebook.Name, res.pricebookName);
+        System.assertEquals(null, res.pricebookAll, 'getPricebookFromOpportunity: Opportunity PriceBook does not exists');
+        System.assertEquals(pricebook.Id, res.pricebookId, 'getPricebookFromOpportunity: not right PriceBook Id');
+        System.assertEquals(pricebook.Name, res.pricebookName, 'getPricebookFromOpportunity: not right PriceBook Name');
     }
 
     @isTest 
@@ -74,10 +75,10 @@ public class AddProductsControllerTest {
             pricebookAll.put(pricebook.Id, pricebook.Name);
         }
 
-        System.assertEquals(1, res.pricebookAll.size());
-        System.assertEquals(null, res.pricebookId);
-        System.assertEquals(null, res.pricebookName);
-        System.assertEquals(pricebookAll, res.pricebookAll);
+        System.assertEquals(1, res.pricebookAll.size(), 'getPricebookFromOpportunity: PriceBook list must be 1 record size');
+        System.assertEquals(null, res.pricebookId, 'getPricebookFromOpportunity: PriceBook Id must be null');
+        System.assertEquals(null, res.pricebookName, 'getPricebookFromOpportunity: PriceBook Name must be null');
+        System.assertEquals(pricebookAll, res.pricebookAll, 'getPricebookFromOpportunity: PriceBook list must be equal to test list');
     }
 
     @isTest 
@@ -90,8 +91,8 @@ public class AddProductsControllerTest {
 
         Opportunity oppRes = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1 ];
 
-        System.assertEquals(true, res);
-        System.assertEquals(pricebook.Id, oppRes.Pricebook2Id);
+        System.assertEquals(true, res, 'updateOpportunityPricebook: error on Opportunity Pricebook update');
+        System.assertEquals(pricebook.Id, oppRes.Pricebook2Id, 'updateOpportunityPricebook: Pricebook Id must be equal to test Id');
     }
 
     @isTest 
@@ -104,10 +105,9 @@ public class AddProductsControllerTest {
 
         List<Opportunity> oppRes = [SELECT Id, Pricebook2Id FROM Opportunity WHERE Pricebook2Id = :pricebook.Id  LIMIT 1 ];
 
-        System.assertEquals(false, res);
-        System.assertEquals(0, oppRes.size());
+        System.assertEquals(false, res, 'updateOpportunityPricebook: Must be an error on Opportunity Pricebook update');
+        System.assertEquals(0, oppRes.size(), 'updateOpportunityPricebook: Opportunity with test Pricebook Id must exists');
     }
-
     
     @isTest
     static void testAddProductsWithoutFilter() {
@@ -117,8 +117,8 @@ public class AddProductsControllerTest {
         Test.startTest();
         List<PricebookEntry> result = AddProductsController.getAllProducts(null,pricebook.Id,null,null);
 
-        System.assertEquals(1, result.size());
-        System.assertEquals(pricebookEntry, result[0]);
+        System.assertEquals(1, result.size(), 'getAllProducts: Product list must be 1 record size');
+        System.assertEquals(pricebookEntry, result[0], 'getAllProducts: Product list must equal to test list');
     }
     
     @isTest
@@ -130,8 +130,8 @@ public class AddProductsControllerTest {
         List<PricebookEntry> result = AddProductsController.getAllProducts('testname',pricebook.Id,null,null);
         Test.stopTest();
 
-        System.assertEquals(1, result.size());
-        System.assertEquals(pricebookEntry, result[0]);
+        System.assertEquals(1, result.size(), 'getAllProducts: Product list must be 1 record size');
+        System.assertEquals(pricebookEntry, result[0], 'getAllProducts: Product list must equal to test list');
     }
     
     @isTest
@@ -143,8 +143,8 @@ public class AddProductsControllerTest {
         List<PricebookEntry> result = AddProductsController.getAllProducts(null,pricebook.Id,'T1',null);
         Test.stopTest();
 
-        System.assertEquals(1, result.size());
-        System.assertEquals(pricebookEntry, result[0]);
+        System.assertEquals(1, result.size(), 'getAllProducts: Product list must be 1 record size');
+        System.assertEquals(pricebookEntry, result[0], 'getAllProducts: Product list must equal to test list');
     }
     
     @isTest
@@ -157,8 +157,8 @@ public class AddProductsControllerTest {
         List<PricebookEntry> result = AddProductsController.getAllProducts(null,pricebook.Id,null,new List<String> {'ProdFamily'});
         Test.stopTest();
 
-        System.assertEquals(1, result.size());
-        System.assertEquals(pricebookEntry, result[0]);
+        System.assertEquals(1, result.size(), 'getAllProducts: Product list must be 1 record size');
+        System.assertEquals(pricebookEntry, result[0], 'getAllProducts: Product list must equal to test list');
     }
     
     @isTest
@@ -185,11 +185,11 @@ public class AddProductsControllerTest {
 
         List<OpportunityLineItem> oppTtemsResult = [SELECT Id, UnitPrice, OpportunityId, Product2Id, Quantity, Description FROM OpportunityLineItem WHERE OpportunityId=:opp.Id LIMIT 1];
 
-        System.assertEquals(null, result);
-        System.assertEquals(oppItem.UnitPrice, oppTtemsResult[0].UnitPrice);
-        System.assertEquals(oppItem.Product2Id, oppTtemsResult[0].Product2Id);
-        System.assertEquals(oppItem.Quantity, oppTtemsResult[0].Quantity);
-        System.assertEquals(oppItem.Description, oppTtemsResult[0].Description);
+        System.assertEquals(null, result, 'setOppItems: Errors on Opportunity Line Item Creation');
+        System.assertEquals(oppItem.UnitPrice, oppTtemsResult[0].UnitPrice, 'setOppItems: Wrong UnitPrice on Opportunity Line Item');
+        System.assertEquals(oppItem.Product2Id, oppTtemsResult[0].Product2Id, 'setOppItems: Wrong Product2Id on Opportunity Line Item');
+        System.assertEquals(oppItem.Quantity, oppTtemsResult[0].Quantity, 'setOppItems: Wrong Quantity on Opportunity Line Item');
+        System.assertEquals(oppItem.Description, oppTtemsResult[0].Description, 'setOppItems: Wrong Description on Opportunity Line Item');
     }
     
     @isTest
@@ -214,7 +214,7 @@ public class AddProductsControllerTest {
 
         List<OpportunityLineItem> oppTtemsResult = [SELECT Id, UnitPrice, OpportunityId, Product2Id, Quantity, Description FROM OpportunityLineItem WHERE OpportunityId=:opp.Id LIMIT 1];
 
-        System.assert(result != null);
-        System.assertEquals(0, oppTtemsResult.size());
+        System.assert(result != null, 'setOppItems: On Errors on Opportunity Line Item Creation');
+        System.assertEquals(0, oppTtemsResult.size(), 'setOppItems: new Opportunity LineItem must not exists');
     }
 }
