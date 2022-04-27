@@ -186,9 +186,9 @@ public class AddProductsControllerTest {
 
         System.assertEquals(null, result, 'setOppItems: Errors on Opportunity Line Item Creation');
         System.assertEquals(oppItem.UnitPrice, oppTtemsResult[0].UnitPrice, 'setOppItems: Wrong UnitPrice on Opportunity Line Item');
-        System.assertEquals(oppItem.Product2Id, oppTtemsResult[0].Product2Id, 'setOppItems: Wrong Product2Id on Opportunity Line Item'));
-        System.assertEquals(oppItem.Quantity, oppTtemsResult[0].Quantity, 'setOppItems: Wrong Quantity on Opportunity Line Item'));
-        System.assertEquals(oppItem.Description, oppTtemsResult[0].Description, 'setOppItems: Wrong Description on Opportunity Line Item'));
+        System.assertEquals(oppItem.Product2Id, oppTtemsResult[0].Product2Id, 'setOppItems: Wrong Product2Id on Opportunity Line Item');
+        System.assertEquals(oppItem.Quantity, oppTtemsResult[0].Quantity, 'setOppItems: Wrong Quantity on Opportunity Line Item');
+        System.assertEquals(oppItem.Description, oppTtemsResult[0].Description, 'setOppItems: Wrong Description on Opportunity Line Item');
     }
     
     @isTest
