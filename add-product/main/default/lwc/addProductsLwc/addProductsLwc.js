@@ -53,9 +53,6 @@ export default class addProductsLwc extends LightningElement{
     pricebookMap;
     @track pricebookList = [];
 
-    // is buttons disabled
-    // @track isSecondNextButtonDisabled = true;
-
     // state variable for page rendering
     stage = -1;
 
