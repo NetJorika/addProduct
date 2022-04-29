@@ -89,7 +89,29 @@ public class AddProductsController {
             }
         } catch (DMLException e) {
             success = false;
-            errorMessage = e.getDmlMessage(0).unescapeHtml4();
+            errorMessage = '[';
+            for (Integer index = 0; index < e.getNumDml(); index++){
+                if (index != 0){ 
+                    errorMessage += ',';
+                }
+                errorMessage += '{';
+                errorMessage += '"rowNum":' + e.getDmlIndex(index) + ','; 
+                if (e.getDmlFieldNames(index).size() > 0){
+                    errorMessage += '"fields":"'; 
+                    for (Integer fieldNumber = 0; fieldNumber < e.getDmlFieldNames(index).size(); fieldNumber++){
+                        if (fieldNumber != 0){
+                            errorMessage += ',';
+                        }
+                        errorMessage += e.getDmlFieldNames(index)[fieldNumber].unescapeHtml4(); 
+                    }
+                    errorMessage += '",'; 
+                }
+                errorMessage += '"error":"'+e.getDmlMessage(index).unescapeHtml4()+'"'; 
+
+                errorMessage += '}';
+            }
+            errorMessage += ']';
+            // errorMessage = e.getDmlMessage(0).unescapeHtml4();
         }    
         return errorMessage;
     }
