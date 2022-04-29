@@ -99,7 +99,7 @@ export default class addProductsLwc extends LightningElement{
         },
         {
             label: 'Price List',
-            fieldName: 'UnitPrice',
+            fieldName: 'ListPrice',
             type: 'currency',
             typeAttributes: { currencyCode: CURRENCY},
             cellAttributes: { alignment: 'left' },
@@ -149,7 +149,7 @@ export default class addProductsLwc extends LightningElement{
         },
         {
             label: 'Price List',
-            fieldName: 'UnitPrice',
+            fieldName: 'ListPrice',
             type: 'currency',
             typeAttributes: { currencyCode: CURRENCY},
             sortable: false,
@@ -158,7 +158,7 @@ export default class addProductsLwc extends LightningElement{
         },
         {
             label: 'Selling price',
-            fieldName: 'SellPrice',
+            fieldName: 'UnitPrice',
             type: 'currency',
             typeAttributes: { currencyCode: CURRENCY},
             sortable: false,
@@ -199,7 +199,7 @@ export default class addProductsLwc extends LightningElement{
                 rowData.Id = row.Product2Id;
                 rowData.nameUrl = `/${row.Product2Id}`;
                 rowData.UnitPrice = row.UnitPrice;      
-                rowData.SellPrice = row.UnitPrice;      
+                rowData.ListPrice = row.UnitPrice;      
                 currentData.push(rowData);
                 currentIds.push(row.Product2Id);
             });
@@ -364,7 +364,7 @@ export default class addProductsLwc extends LightningElement{
             if ( row ){
                 lastItemsRows[i].Quantity = (row.Quantity === undefined )? lastItemsRows[i].Quantity: row.Quantity ;
                 lastItemsRows[i].DescriptionComment = (row.DescriptionComment === undefined )? lastItemsRows[i].DescriptionComment: row.DescriptionComment ;
-                lastItemsRows[i].SellPrice = (row.SellPrice === undefined) ? lastItemsRows[i].SellPrice: row.SellPrice ;
+                lastItemsRows[i].UnitPrice = (row.UnitPrice === undefined) ? lastItemsRows[i].UnitPrice: row.UnitPrice ;
             }
         }
         this.lastItemsRows = lastItemsRows;
@@ -448,7 +448,7 @@ export default class addProductsLwc extends LightningElement{
             if ( row ){
                 selectedProductsProxy[i].Quantity = row.Quantity;
                 selectedProductsProxy[i].DescriptionComment = row.DescriptionComment;
-                selectedProductsProxy[i].SellPrice = row.SellPrice;
+                selectedProductsProxy[i].UnitPrice = row.UnitPrice;
             }else{
                 selectedProductsProxy[i].Quantity = 1;
                 selectedProductsProxy[i].DescriptionComment = null;
@@ -462,7 +462,7 @@ export default class addProductsLwc extends LightningElement{
     @api
     saveOpportunityLineItem() {
         this.updateLastItemsRows();
-
+/*
         // check Line Items
         let secontTableErrors = {rows:{}};
         let errorsExists = false;
@@ -494,13 +494,13 @@ export default class addProductsLwc extends LightningElement{
         if (errorsExists){
             this.secontTableErrors = secontTableErrors;
             return;
-        }
+        }*/
 
         // save correct data
         let productItems = [];
         for(let i in this.lastItemsRows) {
             let fields = {};
-            fields[UNITPRICE_FIELD.fieldApiName] = this.lastItemsRows[i].SellPrice;
+            fields[UNITPRICE_FIELD.fieldApiName] = this.lastItemsRows[i].UnitPrice;
             fields[OPPORTUNITYID_FIELD.fieldApiName] = this.recordId;
             fields[PRODUCT2ID_FIELD.fieldApiName] = this.lastItemsRows[i].Id;
             fields[QUANTITY_FIELD.fieldApiName] = this.lastItemsRows[i].Quantity;
@@ -517,8 +517,39 @@ export default class addProductsLwc extends LightningElement{
         })
         .then((result) => {
             if (result) {
+
+                let errors = JSON.parse(result);
+
+                let secontTableErrors = {rows:{}};
+                let errorsExists = false;
+                for(let i in errors) {
+                    let messages = [];
+                    let fieldNames = [];
+                    let rowErrorCount = 0;
+
+                    if (errors[i].fields){
+                        rowErrorCount += 1;
+                        messages.push(errors[i].error);
+                        fieldNames.push(errors[i].fields);
+                    }
+                
+                    if (rowErrorCount > 0){
+                        errorsExists = true;
+                        secontTableErrors.rows[this.lastItemsRows[errors[i].rowNum].Id]= {
+                            'title' : 'We found ' + rowErrorCount + ' error' + ((rowErrorCount>1)?'s':'') + '.',
+                            'messages' : messages,
+                            'fieldNames' : fieldNames
+                        }
+                    }
+                }
+
+                if (errorsExists){
+                    this.secontTableErrors = secontTableErrors;
+                    return;
+                }
+                
                 const evt = new ShowToastEvent({
-                    title: result,
+                    title: 'Error on record save',
                     variant: "error"
                 });
                 this.dispatchEvent(evt);
