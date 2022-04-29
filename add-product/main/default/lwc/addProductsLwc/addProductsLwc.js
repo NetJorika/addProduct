@@ -240,6 +240,9 @@ export default class addProductsLwc extends LightningElement{
                     this.pricebookList.push( {label: value,value: key});
                 }
                 this.stage = 0;
+                var css = document.body.style;
+                let height = (Object.keys(this.pricebookMap).length * 40 + 75) + 'px';
+                css.setProperty('--comboboxHeight', height);
             }
         })
         .catch((error) => {
@@ -568,11 +571,6 @@ export default class addProductsLwc extends LightningElement{
     get isSecondNextButtonDisabled(){
         return (this.allSelectedIds.length>0)?false:true;
     } 
-
-    // height of combobox to fix modal overflow on zero page 
-    get comboboxHeight(){
-        return "height:"  + (Object.keys(this.pricebookMap).length * 40 + 75) + 'px';
-    }  
 
     // show link to selected rows on first page
     get isSelectedRowsKeysZero(){
