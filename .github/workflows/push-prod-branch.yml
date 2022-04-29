@@ -1,10 +1,10 @@
 # Unique name for this workflow
-name: Deploy integration branch to integration and staging/uat orgs
+name: Deploy master branch to Production org
 
 # Definition when the workflow should run
 on:
     push:
-      branches: [ integration ]
+      branches: [ master ]
       paths:
         - 'add-product/**'
             
@@ -35,7 +35,7 @@ jobs:
                 fetch-depth: 0
 
             # Store secret for both otgs
-            - name: 'Populate auth file with SFDX_URL secret of the integration and staging orgs'
+            - name: 'Populate auth file with SFDX_URL secret of the Production org'
               shell: bash
               run: |
                   echo ${{ secrets.SFDX_PRODUCTION_URL}} > ./SFDX_PRODUCTION_URL.txt
@@ -44,11 +44,11 @@ jobs:
                   mkdir changed-sources
                   sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source add-product/
             # Authenticate to org
-            - name: 'Authenticate to Integration Org'
+            - name: 'Authenticate to Production Org'
               run: sfdx auth:sfdxurl:store -f ./SFDX_PRODUCTION_URL.txt -s -a integration
 
-            - name: 'Deploy the entire branch to Integration org'
+            - name: 'Deploy the entire branch to Production org'
               run: sfdx force:source:deploy -p add-product --testlevel RunLocalTests --json
 
-            - name: 'Deploy destructive changes (if any) to Integration org'
+            - name: 'Deploy destructive changes (if any) to Production org'
               run: sfdx force:mdapi:deploy -d "changed-sources/destructiveChanges" --checkonly --ignorewarnings 
