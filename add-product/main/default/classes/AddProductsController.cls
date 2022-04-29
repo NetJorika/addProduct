@@ -49,10 +49,11 @@ public class AddProductsController {
             return false;
         }
     }
-    
+
     // get filtred product list
     @AuraEnabled(cacheable=true)
-    public static List<PricebookEntry> getAllProducts(String inputName, Id pricebookId, String inputProductCode, List<String> inputFamilies) {  
+    public static List<PricebookEntry> getAllProducts(String inputName, Id pricebookId, String inputProductCode, List<String> inputFamilies) {
+          
         List<PricebookEntry> newlist = null;
         if (String.isNotEmpty(pricebookId)){
             String queryString = 'SELECT Product2Id, Pricebook2Id, Product2.Name, Product2.ProductCode, UnitPrice, Product2.Description, Product2.Family FROM PricebookEntry WHERE Pricebook2Id = :pricebookId';

@@ -6,11 +6,13 @@
     <masterLabel>Add Product</masterLabel>
     <targets>
         <target>lightning__RecordAction</target>
-        <target>lightning__RecordPage</target>
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__RecordAction">
             <actionType>ScreenAction</actionType>
+            <objects>
+                <object>Opportunity</object>
+            </objects>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
