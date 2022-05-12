@@ -214,7 +214,42 @@ public class AddProductsControllerTest {
 
         List<OpportunityLineItem> oppTtemsResult = [SELECT Id, UnitPrice, OpportunityId, Product2Id, Quantity, Description FROM OpportunityLineItem WHERE OpportunityId=:opp.Id LIMIT 1];
 
-        System.assert(result != null, 'setOppItems: On Errors on Opportunity Line Item Creation');
+        System.assert(result != null, 'setOppItems: No Errors on Opportunity Line Item Creation');
+        System.assertEquals(0, oppTtemsResult.size(), 'setOppItems: new Opportunity LineItem must not exists');
+    }
+
+    @isTest
+    static void testSetOppItemsErrorRows() {
+        Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1 ];
+        Pricebook2 pricebook = [SELECT Id, Name FROM Pricebook2 WHERE IsActive = true LIMIT 1];
+        opp.Pricebook2Id = pricebook.Id;
+        update opp;
+        PricebookEntry pricebookEntry = [SELECT Product2Id, Pricebook2Id, Product2.Name, Product2.ProductCode, UnitPrice, Product2.Description, Product2.Family FROM PricebookEntry WHERE Pricebook2Id = :pricebook.Id LIMIT 1];
+ 
+        List<OpportunityLineItem> oppItems = new List<OpportunityLineItem> ();
+
+        oppItems.add(new OpportunityLineItem(
+            UnitPrice = 0,
+            OpportunityId = opp.Id,
+            Product2Id = pricebookEntry.Product2Id,
+            Quantity = 0,
+            Description ='1'
+        ));
+        oppItems.add(new OpportunityLineItem(
+            UnitPrice = 0,
+            OpportunityId = opp.Id,
+            Product2Id = pricebookEntry.Product2Id,
+            Quantity = 0,
+            Description ='2'
+        ));
+
+        Test.startTest();
+        String result = AddProductsController.setOppItems(oppItems);
+        Test.stopTest();
+
+        List<OpportunityLineItem> oppTtemsResult = [SELECT Id, UnitPrice, OpportunityId, Product2Id, Quantity, Description FROM OpportunityLineItem WHERE OpportunityId=:opp.Id LIMIT 1];
+
+        System.assert(result != null, 'setOppItems: No Errors on Opportunity Line Item Creation');
         System.assertEquals(0, oppTtemsResult.size(), 'setOppItems: new Opportunity LineItem must not exists');
     }
 }

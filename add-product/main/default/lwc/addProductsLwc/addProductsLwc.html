@@ -1,5 +1,22 @@
 <template>
     
+    <!--Error PAGE-->
+    <template if:true={getErrorStage}>
+        <header class="slds-modal__header">
+            <h2 id="modal-heading-0-2" class="slds-modal__title slds-hyphenate">Error!</h2>
+        </header>
+        <div class="modal-body scrollable slds-modal__content slds-p-around__medium" id="modal-content-id-0-2">
+            <div class="slds-p-around--medium">
+                <p>   
+                    {errorText}
+                </p>
+            </div>
+        </div>
+        <footer class="slds-modal__footer">
+            <button class="slds-button slds-button_neutral" onclick={closeQuickAction}>Close</button>
+        </footer>
+    </template>
+    
     <!--Spinner PAGE-->
     <template if:true={getSpinnerStage}>
         <div class="slds-is-relative" style="height: 200px;">

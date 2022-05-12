@@ -1,4 +1,4 @@
-public class AddProductsController {
+public with sharing class AddProductsController {
 
     // structure for pricebook request
     public class PricebookResult {
@@ -10,26 +10,45 @@ public class AddProductsController {
         public String pricebookName;
 
         @AuraEnabled
+        public String errorText;
+
+        @AuraEnabled
         public Map<String,String> pricebookAll;
     }
 	
     // get Pricebook From Opportunity or List of all Pricebooks
     @AuraEnabled
     public static PricebookResult getPricebookFromOpportunity(Id opportunityId) {
-        List<Opportunity> oppList = [SELECT Id, Pricebook2Id, Pricebook2.Name FROM Opportunity WHERE Id = :opportunityId];
         PricebookResult res = new PricebookResult();
 
-        if (oppList.size() ==1 && String.isNotEmpty(oppList[0].Pricebook2Id)){
-            res.pricebookId = oppList[0].Pricebook2Id;
-            res.pricebookName = oppList[0].Pricebook2.Name;
-        }else{
-            List<Pricebook2> pricebookList = [SELECT Id, Name FROM Pricebook2 WHERE IsActive = true];
-            Map<String,String> pricebookAll = new Map<String,String>();
-            for (Pricebook2 pricebook : pricebookList){
-                pricebookAll.put(pricebook.Id, pricebook.Name);
+        // Check permissions
+        if (Schema.sObjectType.Pricebook2.fields.Name.isAccessible() 
+            && Schema.sObjectType.Product2.fields.Family.isAccessible()
+            && Schema.sObjectType.Product2.fields.Description.isAccessible()
+            && Schema.sObjectType.Product2.fields.ProductCode.isAccessible()
+            && Schema.sObjectType.Product2.fields.Name.isAccessible()
+            && Schema.sObjectType.Opportunity.fields.Pricebook2Id.isAccessible()
+            && Schema.sObjectType.PricebookEntry.fields.UnitPrice.isAccessible()
+            && Schema.sObjectType.OpportunityLineItem.isCreateable()
+            && Schema.sObjectType.OpportunityLineItem.fields.UnitPrice.isUpdateable()
+            && Schema.sObjectType.OpportunityLineItem.fields.Quantity.isUpdateable()
+            && Schema.sObjectType.OpportunityLineItem.fields.Description.isUpdateable()
+        ){
+            List<Opportunity> oppList = [SELECT Id, Pricebook2Id, Pricebook2.Name FROM Opportunity WHERE Id = :opportunityId];
+            if (oppList.size() == 1 && String.isNotEmpty(oppList[0].Pricebook2Id)){
+                    res.pricebookId = oppList[0].Pricebook2Id;
+                    res.pricebookName = oppList[0].Pricebook2.Name;
+            }else{
+                if (Schema.sObjectType.Opportunity.fields.Pricebook2Id.isUpdateable()){
+                    List<Pricebook2> pricebookList = [SELECT Id, Name FROM Pricebook2 WHERE IsActive = true];
+                    Map<String,String> pricebookAll = new Map<String,String>();
+                    for (Pricebook2 pricebook : pricebookList){
+                        pricebookAll.put(pricebook.Id, pricebook.Name);
+                    }
+                    res.pricebookAll = pricebookAll;
+                }else{ res.errorText = 'You do not have enough permissions to set Pricebook to Opportunity.';}
             }
-            res.pricebookAll = pricebookAll;
-        }
+        }else{ res.errorText = 'You do not have enough permissions.';}
         
         return res;
     }
@@ -90,28 +109,31 @@ public class AddProductsController {
         } catch (DMLException e) {
             success = false;
             errorMessage = '[';
-            for (Integer index = 0; index < e.getNumDml(); index++){
-                if (index != 0){ 
-                    errorMessage += ',';
-                }
-                errorMessage += '{';
-                errorMessage += '"rowNum":' + e.getDmlIndex(index) + ','; 
-                if (e.getDmlFieldNames(index).size() > 0){
-                    errorMessage += '"fields":"'; 
-                    for (Integer fieldNumber = 0; fieldNumber < e.getDmlFieldNames(index).size(); fieldNumber++){
-                        if (fieldNumber != 0){
-                            errorMessage += ',';
-                        }
-                        errorMessage += e.getDmlFieldNames(index)[fieldNumber].unescapeHtml4(); 
+            if (e.getNumDml() > 0){
+                for (Integer index = 0; index < e.getNumDml(); index++){
+                    if (index != 0){ 
+                        errorMessage += ',';
                     }
-                    errorMessage += '",'; 
-                }
-                errorMessage += '"error":"'+e.getDmlMessage(index).unescapeHtml4()+'"'; 
+                    errorMessage += '{';
+                    errorMessage += '"rowNum":' + e.getDmlIndex(index) + ','; 
+                    if (e.getDmlFieldNames(index).size() > 0){
+                        errorMessage += '"fields":"'; 
+                        for (Integer fieldNumber = 0; fieldNumber < e.getDmlFieldNames(index).size(); fieldNumber++){
+                            if (fieldNumber != 0){
+                                errorMessage += ',';
+                            }
+                            errorMessage += e.getDmlFieldNames(index)[fieldNumber].unescapeHtml4(); 
+                        }
+                        errorMessage += '",'; 
+                    }
+                    errorMessage += '"error":"'+e.getDmlMessage(index).unescapeHtml4()+'"'; 
 
-                errorMessage += '}';
+                    errorMessage += '}';
+                }
+            }else{
+                errorMessage += '"error":"'+e.getMessage().unescapeHtml4()+'"';
             }
             errorMessage += ']';
-            // errorMessage = e.getDmlMessage(0).unescapeHtml4();
         }    
         return errorMessage;
     }
