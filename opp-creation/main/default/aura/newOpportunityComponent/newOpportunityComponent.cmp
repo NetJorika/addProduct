@@ -1,0 +1,207 @@
+<aura:component controller="NewOpportunityController"
+    implements="lightning:actionOverride,force:hasRecordId,force:hasSObjectName,force:appHostable,flexipage:availableForRecordHome,lightning:hasPageReference">
+    <aura:html tag="style">
+        .slds-modal__content {
+            height:unset !important;
+            max-height:unset !important;
+        }
+        .slds-modal__container {
+            margin: 0 auto;
+            width: 100%;
+            max-width: 60rem;
+            min-width: 20rem;
+        }
+    </aura:html>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="parentRecordId" type="String" />
+    <aura:attribute name="firstPage" type="boolean" default="false"/>
+    <aura:attribute name="secondPage" type="boolean" default="false"/>
+    <aura:attribute name="thirdPage" type="boolean" default="false"/>
+    <aura:attribute name="fourthPage" type="boolean" default="false"/>
+    <aura:attribute name="recordTypeOption" type="List" />
+    <aura:attribute name="recordTypeValue" type="String" />
+    <aura:attribute name="recordTypeTitle" type="String" />
+    <aura:attribute name="opportunityNumber" type="String" />
+    <aura:attribute name="spinner" type="boolean" default="false" />
+    <aura:attribute name="selectedContact" type="String" />
+    <aura:attribute name="selectedSolution" type="String" />
+    <aura:attribute name="selectedAccount" type="String" />
+    <aura:attribute name="selectedEndCustomer" type="String" />
+    <aura:attribute name="selectedResponsibleUser" type="String" />
+    <aura:attribute name="disableResponsibleUser" type="Boolean" default="false"/>
+    <aura:attribute name="notMixedPayment" type="Boolean" default="true"/>
+    <aura:attribute name="oppRecordTypeId" type="String" />
+
+
+    <aura:attribute name="recordTypeId" type="String" />
+
+    <div class="selectRecordsType">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01"
+                aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <header class="slds-modal__header">
+                    <lightning:buttonIcon iconName="utility:close"
+                                                    onclick="{! c.closeModal }"
+                                                    alternativeText="close"
+                                                    variant="bare-inverse"
+                                                    class="slds-modal__close"/>
+                </header>
+            <div class="slds-modal__container">
+                <c:newOpportunityLwcComponent aura:id="newopp" recordId="{!v.recordId}" recordTypeId="{!v.recordTypeId}"/>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+
+    
+
+    <!-- выбор типа сделки -->
+    <aura:if isTrue="{!v.firstPage}">
+        <div class="selectRecordsType">
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01"
+                    aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning:buttonIcon iconName="utility:close"
+                                                        onclick="{! c.closeModal }"
+                                                        alternativeText="close"
+                                                        variant="bare-inverse"
+                                                        class="slds-modal__close"/>
+                        <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Новая сделка</h2>
+                    </header>
+                    
+                    <div class="slds-modal__content" id="modal-content-id-1">
+
+
+                        <div class="slds-align_absolute-center slds-m-top_large slds-m-bottom_large">
+                            <lightning:radioGroup   aura:id="recordType" name="radioGroup"
+                                                    label="Выберите тип записи сделки"
+                                                    options="{! v.recordTypeOption }"
+                                                    value="{! v.recordTypeValue }"
+                                                    type="radio"
+                                                    onchange="{! c.handleChange }"/>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning:button variant="neutral"
+                                        label="Отмена"
+                                        title="Отмена"
+                                        onclick="{! c.closeModal }"/>
+                        <lightning:button variant="brand"
+                                        label="Далее"
+                                        title="Далее"
+                                        onclick="{! c.nextPage }"/>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+    </aura:if>
+
+    <!-- основные продукты -->
+    <aura:if isTrue="{!v.secondPage}">
+        <div class="mainProductsPage">
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-02"
+                    aria-modal="true" aria-describedby="modal-content-id-2" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+
+                    <aura:if isTrue="{!v.spinner}">
+                        <div aura:id="spinnerId" class="slds-spinner_container">
+                            <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                                <span class="slds-assistive-text">Loading...</span>
+                                <div class="slds-spinner__dot-a"></div>
+                                <div class="slds-spinner__dot-b"></div>
+                            </div>
+                        </div>
+                    </aura:if>
+
+                    <header class="slds-modal__header">
+                        <lightning:buttonIcon iconName="utility:close"
+                                                        onclick="{! c.closeModal }"
+                                                        alternativeText="close"
+                                                        variant="bare-inverse"
+                                                        class="slds-modal__close"/>
+                        <h2 id="modal-heading-02" class="slds-modal__title slds-hyphenate">Новая сделка: <b>{!v.recordTypeTitle}</b></h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_small slds-is-relative" id="modal-content-id-2">
+                        <div class="slds-section slds-is-open">
+                            <h3 class="slds-section__title slds-theme_shade">
+                              <span class="slds-truncate slds-p-horizontal_small" title="Информация о сделке">Информация о сделке</span>
+                            </h3>
+                            <div aria-hidden="false" class="slds-section__content">
+                                <div class="">
+                                    <lightning:recordEditForm   aura:id="recordEditFormOpportunity"
+                                                                objectApiName="Opportunity"
+                                                                onsubmit="{! c.handleSubmitOpportunity }"
+                                                                onsuccess="{! c.handleSuccessOpportunity }"
+                                                                onerror="{!c.handleErrorOpportunity}"
+                                                                recordTypeId="{!v.oppRecordTypeId}">
+                                        <lightning:messages />
+                                        <div class="slds-grid slds-form slds-gutters slds-is-editing slds-has-flexi-truncate full">
+                                            <div class="slds-col slds-size_1-of-2 slds-form-element slds-form-element_horizontal">
+                                                <lightning:inputField aura:id="opportunityNameField" fieldName="Name"  />
+                                                <c:lookupField  objectAPIName="Account"
+                                                                label="Название организации"
+                                                                returnFields="['Name']"
+                                                                queryFields="['Name']"
+                                                                required="true"
+                                                                selectedId="{!v.selectedAccount}"
+                                                                showIcon="false"
+                                                                filter="nullString"/>
+                                                <lightning:inputField aura:id="stageNameField" required="true" fieldName="StageName" value="Qualification" />
+                                                <lightning:inputField aura:id="leadSourceField" required="true" fieldName="LeadSource" />
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2 slds-form-element slds-form-element_horizontal">
+                                                <c:lookupField  objectAPIName="Account"
+                                                                label="Конечный клиент"
+                                                                returnFields="['Name']"
+                                                                queryFields="['Name']"
+                                                                selectedId="{!v.selectedEndCustomer}"
+                                                                showIcon="false"
+                                                                filter="nullString"/>
+                                                <lightning:inputField aura:id="closeDateField" required="true" fieldName="CloseDate" />
+                                                <c:lookupField  objectAPIName="Contact"
+                                                                label="Контактное лицо"
+                                                                returnFields="['Name', 'Account.Name']"
+                                                                queryFields="['Name', 'Account.Name']"
+                                                                selectedId="{!v.selectedContact}"
+                                                                showIcon="false"
+                                                                filter="nullString"/>
+                                                <c:lookupField  objectAPIName="User"
+                                                                label="Ответственный сотрудник"
+                                                                returnFields="['Name']"
+                                                                queryFields="['Name']"
+                                                                selectedId="{!v.selectedResponsibleUser}"
+                                                                showIcon="false"
+                                                                filter="nullString"
+                                                                disabled="{!v.disableResponsibleUser}"/>
+                                                <lightning:inputField aura:id="typeField" required="true" fieldName="Type" />
+                                            </div>
+                                        </div>
+                                        <button style="display: none;" id="submitOpportunity" type="submit" />
+                                    </lightning:recordEditForm>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="">
+                        
+                            <!--c:addProductsLwc2 aura:id="addproduct" recordId="{!v.recordId}" isLeadConvert="true" selectedSolution="{!v.selectedSolution}"/-->
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning:button variant="neutral"
+                                        label="Закрыть"
+                                        title="Закрыть"
+                                        onclick="{! c.closeModal }"/>
+                        <lightning:button variant="brand"
+                                        label="Сохранить"
+                                        title="Сохранить"
+                                        onclick="{! c.save }"/>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+    </aura:if>
+
+</aura:component>

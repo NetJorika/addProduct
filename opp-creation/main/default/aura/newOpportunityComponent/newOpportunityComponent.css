@@ -1,0 +1,19 @@
+.THIS legend.slds-form-element__legend {
+    padding-bottom: 10px;
+}
+
+.THIS div > span.slds-radio {
+    padding-bottom: 10px;
+}
+
+.THIS label.slds-form-element__label .labelHide {
+    display: none;
+}
+
+.THIS div[lightning-duallistbox_duallistbox].slds-form-element__control {
+    padding-left: 15%;
+}
+/* 
+.THIS .slds-form-element {
+    padding-bottom: 12px;
+} */

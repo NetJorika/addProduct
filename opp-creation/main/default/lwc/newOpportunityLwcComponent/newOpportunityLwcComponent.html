@@ -1,0 +1,86 @@
+<template>
+    {recordTypeId}
+    {recordId} 
+    {fields}
+    <template if:true={isCreateable}>
+        <lightning-record-edit-form oncancel={handleCancel} record-id={recordId} 
+        object-api-name={objectApiName} record-type-id={recordTypeId}
+        onsubmit={handleFormSubmit} onerror={handleError}>
+        <lightning-messages></lightning-messages>
+        <lightning-spinner if:true={showSpinner} class="loadingSpinner" variant="brand"></lightning-spinner>
+        <header class="slds-modal__header">
+            <h2 class="slds-modal__title slds-hyphenate">{headerLabel}</h2>
+        </header>
+        <div class="slds-modal__content slds-p-around_medium">
+            <!--template if:true={isDuplicateRequest}>
+                <div class = 'slds-box slds-box_small slds-theme_shade'>
+                    <b>{errorMessage}</b>
+                    <div class="uiScroller scroller-wrapper scroll-bidirectional native">
+                        <table class="slds-table slds-table_bordered slds-border_left slds-border_right">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <template for:each={duplicateColumns} for:item="column">
+                                        <th key = {column.fieldName} class="" scope="col">
+                                            <div class="slds-truncate" title={column.fieldLabel}>{column.fieldLabel}</div>
+                                        </th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={duplicateRecords} for:item="record">
+                                    <tr key = {record}>
+                                        <template for:each={record.record} for:item="column">
+                                            <td key={column.value} data-label={column.value}>
+                                                <template if:true={column.isLink}>
+                                                    <lightning-formatted-url value={column.url} label={column.value} target="_blank"></lightning-formatted-url>
+                                                </template>
+                                                <template if:false={column.isLink}>
+                                                    {column.value}
+                                                </template>
+                                            </td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </template-->
+            <div class="slds-grid slds-wrap">
+                <template for:each={fields} for:item="field">
+                    <div if:true={field.editable} key = {field.name} class="slds-size_1-of-2">
+                        <div class="slds-m-around_x-small">
+                            <lightning-input-field if:true={field.editable} required={field.isRequired} field-name={field.name} ></lightning-input-field>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+        <footer class="slds-col modal-footer slds-modal__footer">
+            <lightning-button label="Отмена" style="margin-right: 10px" onclick={handleCancel}></lightning-button>
+            <lightning-button variant="brand" label="Сохранить" type="submit"></lightning-button>
+        </footer>
+        </lightning-record-edit-form>
+    </template >
+
+
+
+    <template if:false={isCreateable}>
+        <lightning-record-edit-form oncancel={handleCancel} record-id={recordId} 
+            object-api-name={objectApiName} onsubmit={handleFormSubmit} onerror={handleError}>
+            <lightning-messages></lightning-messages>
+            <lightning-spinner if:true={showSpinner} class="loadingSpinner" variant="brand"></lightning-spinner>
+            <header class="slds-modal__header">
+                <h2 class="slds-modal__title slds-hyphenate">{headerLabel}</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium">
+                <div class="slds-grid slds-wrap">
+                    У текущего пользователя недостаточно прав для редактирования объекта "{sObjectLabel}".
+                </div>
+            </div>
+            <footer class="slds-col modal-footer slds-modal__footer">
+                <lightning-button label="Отмена" style="margin-right: 10px" onclick={handleCancel}></lightning-button>
+            </footer>
+        </lightning-record-edit-form>
+    </template>
+</template>

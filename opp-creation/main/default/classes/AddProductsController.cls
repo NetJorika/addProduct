@@ -1,5 +1,7 @@
 public with sharing class AddProductsController {
 
+    public class AddProductsException extends Exception {}
+
     // structure for pricebook request
     public class PricebookResult {
 
@@ -27,7 +29,7 @@ public with sharing class AddProductsController {
             && Schema.sObjectType.Product2.fields.Description.isAccessible()
             && Schema.sObjectType.Product2.fields.ProductCode.isAccessible()
             && Schema.sObjectType.Product2.fields.Name.isAccessible()
-            && Schema.sObjectType.Opportunity.fields.Pricebook2Id.isAccessible()
+            && Schema.sObjectType.Opportunity.fields.Pricebook2Id.isUpdateable()
             && Schema.sObjectType.PricebookEntry.fields.UnitPrice.isAccessible()
             && Schema.sObjectType.OpportunityLineItem.isCreateable()
             && Schema.sObjectType.OpportunityLineItem.fields.UnitPrice.isUpdateable()
@@ -56,9 +58,16 @@ public with sharing class AddProductsController {
     // update Opportunity Pricebook from zero page
     @AuraEnabled
     public static boolean updateOpportunityPricebook(Id opportunityId, Id pricebookId) {
-        List<Opportunity> oppList = [SELECT Id, Pricebook2Id, Pricebook2.Name FROM Opportunity WHERE Id = :opportunityId];
+
+        // Check permissions
+        if (!(Schema.sObjectType.Opportunity.isUpdateable()
+            && Schema.sObjectType.Opportunity.fields.Pricebook2Id.isUpdateable()
+            && Schema.sObjectType.Pricebook2.fields.Name.isAccessible() )){
+            throw new AddProductsException('You do not have enough permissions.');
+        }
 
         try{
+            List<Opportunity> oppList = [SELECT Id, Pricebook2Id, Pricebook2.Name FROM Opportunity WHERE Id = :opportunityId];
             if (oppList.size() ==1 && String.isNotEmpty(pricebookId) ){
                 oppList[0].Pricebook2Id = pricebookId;
                 update oppList;
@@ -73,6 +82,18 @@ public with sharing class AddProductsController {
     @AuraEnabled(cacheable=true)
     public static List<PricebookEntry> getAllProducts(String inputName, Id pricebookId, String inputProductCode, List<String> inputFamilies) {
           
+        // Check permissions
+        if (!(Schema.sObjectType.Opportunity.isUpdateable()
+            && Schema.sObjectType.Pricebook2.fields.Name.isAccessible() 
+            && Schema.sObjectType.Product2.fields.Family.isAccessible()
+            && Schema.sObjectType.Product2.fields.Description.isAccessible()
+            && Schema.sObjectType.Product2.fields.ProductCode.isAccessible()
+            && Schema.sObjectType.Product2.fields.Name.isAccessible()
+            && Schema.sObjectType.PricebookEntry.fields.Product2Id.isAccessible()
+            && Schema.sObjectType.PricebookEntry.fields.Pricebook2Id.isAccessible()
+            && Schema.sObjectType.PricebookEntry.fields.UnitPrice.isAccessible())){
+            throw new AddProductsException('You do not have enough permissions.');
+        }
         List<PricebookEntry> newlist = null;
         if (String.isNotEmpty(pricebookId)){
             String queryString = 'SELECT Product2Id, Pricebook2Id, Product2.Name, Product2.ProductCode, UnitPrice, Product2.Description, Product2.Family FROM PricebookEntry WHERE Pricebook2Id = :pricebookId';
@@ -100,6 +121,15 @@ public with sharing class AddProductsController {
     // save Opportunity Line Items
     @AuraEnabled
     public static String setOppItems(List<OpportunityLineItem> oppItemsList){
+
+        // Check permissions
+        if (!(Schema.sObjectType.OpportunityLineItem.isCreateable()
+            && Schema.sObjectType.OpportunityLineItem.fields.UnitPrice.isUpdateable()
+            && Schema.sObjectType.OpportunityLineItem.fields.Quantity.isUpdateable()
+            && Schema.sObjectType.OpportunityLineItem.fields.Description.isUpdateable())){
+            throw new AddProductsException('You do not have enough permissions.');
+        }
+
         String errorMessage;
         Boolean success = true;
         try {
