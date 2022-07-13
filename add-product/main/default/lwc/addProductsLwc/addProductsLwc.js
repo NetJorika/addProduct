@@ -35,6 +35,7 @@ export default class addProductsLwc extends LightningElement{
     sortDirection = 'asc';
     sortedBy;
     error;
+    errorText;
 
     // variable for records on first page
     products;
@@ -225,8 +226,10 @@ export default class addProductsLwc extends LightningElement{
     getPricebookFromOpportunity() {
         getPricebookFromOpportunity({opportunityId: this.recordId})
         .then((result) => {
- 
-            if (result.pricebookId){
+            if (result.errorText){
+                this.errorText = result.errorText;
+                this.stage = -2;
+            }else if (result.pricebookId){
                 this.pricebookId = result.pricebookId;
                 this.pricebookName = result.pricebookName;
                 this.stage = 1;
@@ -243,7 +246,9 @@ export default class addProductsLwc extends LightningElement{
             }
         })
         .catch((error) => {
-             console.log('error of getPricebookFromOpportunity', error)
+            this.stage = -2;
+            console.log('error of getPricebookFromOpportunity', error)
+            this.errorText = error.body.message;
         });
     }
     
@@ -550,24 +555,34 @@ export default class addProductsLwc extends LightningElement{
                     variant: "error"
                 });
                 this.dispatchEvent(evt);
-                const errorEvent = new CustomEvent('erroroppline');
-                this.dispatchEvent(errorEvent);
+                // const errorEvent = new CustomEvent('erroroppline');
+                // this.dispatchEvent(errorEvent);
             } else {
-                this.closeQuickAction();
                 const evt = new ShowToastEvent({
                     title: "Your Products have been successfully added to the Opportunity!",
                     variant: "success"
                 });
                 this.dispatchEvent(evt);
-                const successEvent = new CustomEvent('successoppline');
-                this.dispatchEvent(successEvent);
+                // const successEvent = new CustomEvent('successoppline');
+                // this.dispatchEvent(successEvent);
                 eval("$A.get('e.force:refreshView').fire();");
                 this.closeQuickAction();
             }
         })
         .catch((error) => {
             console.log('error of setOpportunityLineItems', error)
+            const evt = new ShowToastEvent({
+                title: 'Error on record save',
+                variant: "error",
+                message: error.body.message
+            });
+            this.dispatchEvent(evt);
         });
+    }
+
+    // get stage for template
+    get getErrorStage(){
+        return this.stage == -2;
     }
 
     // get stage for template
